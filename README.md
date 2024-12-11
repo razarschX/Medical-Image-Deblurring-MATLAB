@@ -29,15 +29,10 @@ Usage
 Steps to Run
 Clone this repository:
 
-bash
-Copy code
-git clone https://github.com/YOUR-USERNAME/Medical-Image-Deblurring-MATLAB.git
-Open the inverse_imaging_problem_solution.m file in MATLAB.
+https://github.com/YOUR-USERNAME/Medical-Image-Deblurring-MATLAB.git
 
 Make sure to set the path for the input medical image (such as an X-ray) in the code:
 
-matlab
-Copy code
 image = imread('path_to_your_xray_image');
 
 Run the script in MATLAB:
@@ -55,9 +50,6 @@ Iterations: The default number of optimization iterations is set to 1000.
 Sample Usage
 You can run the code for an X-ray image by simply calling the script:
 
-matlab
-Copy code
-inverse_imaging_problem_solution
 Output
 The deblurred image will be displayed along with the original image for comparison.
 License
