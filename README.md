@@ -37,8 +37,6 @@ image = imread('path_to_your_xray_image');
 
 Run the script in MATLAB:
 
-matlab
-Copy code
 run('inverse_imaging_problem_solution.m')
 
 The program will process the image using the U-Net model and display the original blurred image along with the enhanced (deblurred) result.
