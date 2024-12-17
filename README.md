@@ -1,5 +1,5 @@
-# Medical-Image-Deblurring-MATLAB
-A MATLAB implementation for enhancing blurry medical images using a U-Net architecture
+# Medical-Image-Denoising-MATLAB
+A MATLAB implementation for enhancing noisy medical images using a U-Net architecture
 Medical Image Deblurring with U-Net (MATLAB)
 This repository contains a MATLAB implementation of a deep learning-based method for enhancing blurry medical images using a U-Net architecture. The goal is to demonstrate the use of Deep Image Prior (DIP) techniques for deblurring and enhancing the quality of medical images, such as X-ray scans.
 
