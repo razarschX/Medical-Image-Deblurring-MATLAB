@@ -1,109 +1,112 @@
-%% Inverse Imaging Problem Solution
-%% Step 1: Define the U-Net Architecture for Deblurring
-function layers = createUNetDeblurring()
-    layers = [
-        imageInputLayer([256, 256, 1], 'Name', 'input', 'Normalization', 'none')
-
-        convolution2dLayer(3, 64, 'Padding', 'same', 'Name', 'conv1')
-        reluLayer('Name', 'relu1')
-
-        convolution2dLayer(3, 128, 'Padding', 'same', 'Name', 'conv2')
-        reluLayer('Name', 'relu2')
-
-        transposedConv2dLayer(3, 64, 'Cropping', 'same', 'Name', 'deconv1')
-        reluLayer('Name', 'relu3')
-
-        transposedConv2dLayer(3, 1, 'Cropping', 'same', 'Name', 'deconv2')
-        sigmoidLayer('Name', 'output')
-    ];
+% Step 1: Load and Preprocess Image Data
+inputImage = imread('C:\Users\razar\Documents\MATLAB\random.jpg'); % User input image
+inputImage = im2double(inputImage); % Convert image to double precision
+if size(inputImage, 3) == 1
+    inputImage = repmat(inputImage, [1 1 3]); % Convert grayscale to RGB if needed
 end
 
-%% Step 2: Load and Prepare the Input Image (X-ray)
-function image = loadImage(imagePath)
-    image = imread(imagePath); 
+% Step 2: Add noise to simulate forward operator
+noisyImage = imnoise(inputImage, 'gaussian', 0, 0.02); % Add Gaussian noise
 
-    % Convert RGB to grayscale if needed
-    if size(image, 3) == 3
-        image = rgb2gray(image);
-    end
-
-    image = im2double(image); % Convert to double precision in [0, 1]
-    image = imresize(image, [256, 256]); % Resize to 256x256 for consistency
-end
-
-%% Step 3: Create a Blurred Image (Simulated for Deblurring)
-function blurredImage = addBlur(image, blurKernelSize)
-    % Create a Gaussian blur kernel
-    h = fspecial('gaussian', blurKernelSize, blurKernelSize/6);
-    blurredImage = imfilter(image, h, 'symmetric');
-end
-
-%% Main Script: Image Deblurring in Medical Images (X-ray)
-% Get user input for the image path
-imagePath = input('Enter the path to the blurry medical X-ray image: ', 's');
-
-% Step 1: Load and Prepare the Original Image
-originalImage = loadImage(imagePath);
-
-% Step 2: Simulate a Blurry Image
-blurredImage = addBlur(originalImage, 7);  % Simulating blur with a kernel size of 7x7
-inputImage = blurredImage;  % Use the blurred image as input to the network
-
-% Reshape for network input
-inputImage = reshape(inputImage, [256, 256, 1]);
-
-% Convert images to dlarray for deep learning
-inputImage = dlarray(inputImage, 'SSCB'); % 'SSCB' refers to spatial (S), channel (C), and batch (B) dimensions
-originalImage = dlarray(originalImage, 'SSCB');
-
-% Define U-Net for Deblurring
-layers = createUNetDeblurring();
-net = dlnetwork(layerGraph(layers));  % Create a U-Net as a dlnetwork
-
-% Random Noise for Input to Network (as in DIP)
-inputNoise = randn([256, 256, 1], 'single');
-inputNoise = dlarray(inputNoise, 'SSCB');
-
-%% Step 4: Training Loop for Deblurring
-maxEpochs = 1000;
-learningRate = 1e-3;
-trailingAvg = [];
-trailingAvgSq = [];
-
-% Prepare for GPU (if available)
-if canUseGPU()
-    inputNoise = gpuArray(inputNoise);
-    inputImage = gpuArray(inputImage);
-    originalImage = gpuArray(originalImage);
-end
-
-for epoch = 1:maxEpochs
-    % Forward and Backward Pass
-    [gradients, loss] = dlfeval(@modelGradients, net, inputNoise, originalImage, inputImage);
-    [net, trailingAvg, trailingAvgSq] = adamupdate(net, gradients, trailingAvg, trailingAvgSq, epoch, learningRate);
-
-    % Display progress every 100 epochs
-    if mod(epoch, 100) == 0
-        fprintf('Epoch %d, Loss: %.4f\n', epoch, loss);
-    end
-end
-
-%% Display Results for Deblurring
-% Get the output from the network (Enhanced Image)
-deblurredImage = predict(net, inputNoise);
-deblurredImage = extractdata(deblurredImage); % Extract data from dlarray
+% Display input and noisy images
 figure;
-subplot(1, 2, 1); imshow(inputImage, []); title('Blurred Image (Input)');
-subplot(1, 2, 2); imshow(deblurredImage, []); title('Deblurred Image (Output)');
+subplot(1,2,1); imshow(inputImage); title('Original Image');
+subplot(1,2,2); imshow(noisyImage); title('Noisy Image');
 
-%% Supporting Functions
-function [gradients, loss] = modelGradients(net, inputNoise, originalImage, inputImage)
-    % Forward pass
-    output = forward(net, inputNoise);
+% Step 3: U-Net Architecture Definition
+inputSize = [256 256 3];
+numClasses = 3; % For RGB output
 
-    % Compute loss between the output (deblurred) and the original sharp image
-    loss = mse(output, originalImage);
+% Encoder (Downsampling Path)
+layers = [
+    imageInputLayer(inputSize, 'Name', 'input')
+    
+    % Downsampling blocks
+    convolution2dLayer(3,64,'Padding','same','Name','conv1_1')
+    reluLayer('Name','relu1_1')
+    convolution2dLayer(3,64,'Padding','same','Name','conv1_2')
+    reluLayer('Name','relu1_2')
+    maxPooling2dLayer(2,'Stride',2,'Name','maxpool1')
+    
+    convolution2dLayer(3,128,'Padding','same','Name','conv2_1')
+    reluLayer('Name','relu2_1')
+    convolution2dLayer(3,128,'Padding','same','Name','conv2_2')
+    reluLayer('Name','relu2_2')
+    maxPooling2dLayer(2,'Stride',2,'Name','maxpool2')
 
-    % Compute gradients
-    gradients = dlgradient(loss, net.Learnables);
-end
+    convolution2dLayer(3,256,'Padding','same','Name','conv3_1')
+    reluLayer('Name','relu3_1')
+    convolution2dLayer(3,256,'Padding','same','Name','conv3_2')
+    reluLayer('Name','relu3_2')
+    maxPooling2dLayer(2,'Stride',2,'Name','maxpool3')
+
+    convolution2dLayer(3,512,'Padding','same','Name','conv4_1')
+    reluLayer('Name','relu4_1')
+    convolution2dLayer(3,512,'Padding','same','Name','conv4_2')
+    reluLayer('Name','relu4_2')
+    maxPooling2dLayer(2,'Stride',2,'Name','maxpool4')
+
+    % Bottleneck
+    convolution2dLayer(3,1024,'Padding','same','Name','conv5_1')
+    reluLayer('Name','relu5_1')
+    convolution2dLayer(3,1024,'Padding','same','Name','conv5_2')
+    reluLayer('Name','relu5_2')
+    
+    % Upsampling Path (Decoder)
+    transposedConv2dLayer(2,512,'Stride',2,'Cropping','same','Name','upconv4')
+    convolution2dLayer(3,512,'Padding','same','Name','conv6_1')
+    reluLayer('Name','relu6_1')
+    convolution2dLayer(3,512,'Padding','same','Name','conv6_2')
+    reluLayer('Name','relu6_2')
+    
+    transposedConv2dLayer(2,256,'Stride',2,'Cropping','same','Name','upconv3')
+    convolution2dLayer(3,256,'Padding','same','Name','conv7_1')
+    reluLayer('Name','relu7_1')
+    convolution2dLayer(3,256,'Padding','same','Name','conv7_2')
+    reluLayer('Name','relu7_2')
+    
+    transposedConv2dLayer(2,128,'Stride',2,'Cropping','same','Name','upconv2')
+    convolution2dLayer(3,128,'Padding','same','Name','conv8_1')
+    reluLayer('Name','relu8_1')
+    convolution2dLayer(3,128,'Padding','same','Name','conv8_2')
+    reluLayer('Name','relu8_2')
+    
+    transposedConv2dLayer(2,64,'Stride',2,'Cropping','same','Name','upconv1')
+    convolution2dLayer(3,64,'Padding','same','Name','conv9_1')
+    reluLayer('Name','relu9_1')
+    convolution2dLayer(3,64,'Padding','same','Name','conv9_2')
+    reluLayer('Name','relu9_2')
+
+    % Output layer
+    convolution2dLayer(1, numClasses, 'Name', 'conv10')
+    regressionLayer('Name','output') % For regression since it's a denoising task
+];
+
+% Step 4: Define Training Options
+options = trainingOptions('adam', ...
+    'InitialLearnRate',1e-4, ...
+    'MaxEpochs',1000, ...
+    'MiniBatchSize',16, ...
+    'Shuffle','every-epoch', ...
+    'Plots','training-progress', ...
+    'Verbose',false);
+
+% Step 5: Prepare Training Data
+% Let's assume the training data is a set of pairs of noisy and clean images.
+% Since this is a demo, we’ll use the same image for training purposes.
+noisyImage = imresize(noisyImage, [256 256]);
+inputImage = imresize(inputImage, [256 256]);
+
+XTrain = {noisyImage}; % Noisy images as input
+YTrain = {inputImage}; % Clean images as ground truth
+
+% Step 6: Train the U-Net Model
+net = trainNetwork(cat(4, XTrain{:}), cat(4, YTrain{:}), layers, options);
+
+% Step 7: Evaluate the Model on the Test Image
+denoisedImage = predict(net, noisyImage);
+
+% Step 8: Display Results
+figure;
+imshowpair(noisyImage, denoisedImage, 'montage');
+title('Noisy Image (Left) vs Denoised Image (Right)');
