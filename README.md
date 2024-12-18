@@ -18,7 +18,7 @@ This MATLAB code uses a **U-Net** architecture to remove Gaussian noise from an 
 
 ## Prerequisites
 
-- MATLAB 2018b or later
+- MATLAB R2024b
 - Deep Learning Toolbox
 
 Ensure you have installed the required toolbox with:
