@@ -1,4 +1,3 @@
-Here’s a template for the `README.md` file to accompany the code on GitHub:
 
 ---
 
@@ -109,3 +108,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Based on the ideas from the Deep Image Prior paper by Dmitry Ulyanov et al.
 - MATLAB U-Net architecture inspired by various tutorials on image segmentation and denoising.
+
+---
