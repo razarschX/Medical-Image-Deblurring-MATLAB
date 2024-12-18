@@ -1,5 +1,15 @@
-% Step 1: Load and Preprocess Image Data
-inputImage = imread('C:\Users\razar\Documents\MATLAB\random.jpg'); % User input image
+% Step 1: Load and Preprocess Image Data using File Dialog
+[file, path] = uigetfile({'*.jpg;*.png;*.jpeg;*.bmp','Image Files (*.jpg, *.png, *.jpeg, *.bmp)'}, ...
+                         'Select an Image');
+if isequal(file, 0)
+    disp('User selected Cancel');
+    return;
+else
+    inputImage = imread(fullfile(path, file)); % Load the selected image
+    disp(['User selected ', fullfile(path, file)]);
+end
+
+% Preprocess the image
 inputImage = im2double(inputImage); % Convert image to double precision
 if size(inputImage, 3) == 1
     inputImage = repmat(inputImage, [1 1 3]); % Convert grayscale to RGB if needed
