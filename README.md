@@ -45,7 +45,7 @@ inputImage = imread('C:\Users\razar\Documents\MATLAB\random.jpg');
 
 ### Step 2: Running the Code
 
-Once you have set up the image path, run the `unet_denoising.m` script. The code will:
+Once you have set up the image path, run the `Inverse_Imaging_Problem_Solution.m` script. The code will:
 
 1. Load and preprocess the image.
 2. Add Gaussian noise to the image to simulate the forward operator.
