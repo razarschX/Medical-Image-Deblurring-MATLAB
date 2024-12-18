@@ -93,7 +93,7 @@ Below is an example result of running the code on a noisy image:
 
 | Noisy Image | Denoised Image |
 |-------------|----------------|
-| ![Noisy Image](path_to_noisy_image) | ![Denoised Image](path_to_denoised_image) |
+| ![Noisy Image](noisyImage.png) | ![Denoised Image](denoisedImage.png) |
 
 ## Future Work
 
