@@ -1,58 +1,111 @@
-# Medical-Image-Denoising-MATLAB
-A MATLAB implementation for enhancing noisy medical images using a U-Net architecture
-Medical Image Deblurring with U-Net (MATLAB)
-This repository contains a MATLAB implementation of a deep learning-based method for enhancing blurry medical images using a U-Net architecture. The goal is to demonstrate the use of Deep Image Prior (DIP) techniques for deblurring and enhancing the quality of medical images, such as X-ray scans.
+Here’s a template for the `README.md` file to accompany the code on GitHub:
 
-Features
-Deep Image Prior (DIP): Utilizes the concept of DIP where the structure of the neural network acts as a prior for image reconstruction tasks.
-U-Net Architecture: A convolutional neural network designed for image denoising and enhancement.
-Medical Image Focus: Specifically designed for deblurring blurry medical images like X-ray scans.
-Requirements
-Before running the code, ensure that you have the following installed:
+---
 
-MATLAB (R2020b or later recommended)
-Deep Learning Toolbox
-Image Processing Toolbox
-Code Overview
-U-Net Architecture
-This implementation uses a simple U-Net architecture which is commonly used for image segmentation and image reconstruction tasks. The U-Net consists of:
+# U-Net for Image Denoising in MATLAB
 
-Encoder: For extracting features from the input image.
-Decoder: For reconstructing the image based on the features extracted.
-Forward Operator
-The forward operator mimics real-world degradation of images, such as adding blur or noise. In this case, we simulate blurring in medical images.
+This project implements a U-Net architecture in MATLAB for solving an inverse imaging problem where the forward operator adds noise to the input image. The network is trained to denoise the image, following the ideas from the Deep Image Prior paper by Dmitry Ulyanov.
 
-Inverse Problem Solution
-The inverse problem is solved using a combination of U-Net and DIP. The model learns to reconstruct the clear version of a blurred medical image without requiring a pre-trained model.
+## Overview
 
-Usage
-Steps to Run
-Clone this repository:
+This MATLAB code uses a **U-Net** architecture to remove Gaussian noise from an image. The forward operator simulates real-world noise (e.g., from sensors), and the U-Net is trained as a denoising autoencoder, with noisy images as input and clean images as the ground truth. The architecture follows an encoder-decoder design, with skip connections between corresponding encoder and decoder layers.
 
-https://github.com/YOUR-USERNAME/Medical-Image-Deblurring-MATLAB.git
+### Key Features
+- Input image preprocessing to handle both grayscale and RGB images.
+- U-Net architecture with adjustable depth and channels.
+- Implementation of Gaussian noise addition as the forward operator.
+- Option to train the model and visualize the denoised image alongside the noisy image.
+- Example training and testing using a single image as a demo.
 
-Make sure to set the path for the input medical image (such as an X-ray) in the code:
+## Prerequisites
 
-image = imread('path_to_your_xray_image');
+- MATLAB 2018b or later
+- Deep Learning Toolbox
 
-Run the script in MATLAB:
+Ensure you have installed the required toolbox with:
+```matlab
+matlab.addons.install('Deep Learning Toolbox');
+```
 
-run('inverse_imaging_problem_solution.m')
+## Installation
 
-The program will process the image using the U-Net model and display the original blurred image along with the enhanced (deblurred) result.
+1. Clone or download this repository to your local machine.
+    ```bash
+    git clone https://github.com/yourusername/unet-image-denoising.git
+    ```
+2. Open MATLAB and navigate to the project directory.
 
-Parameters
-Image Path: Modify the image variable to point to your medical image file.
-Optimizer Settings: The Adam optimizer is used with a learning rate of 1e-3.
-Iterations: The default number of optimization iterations is set to 1000.
-Sample Usage
-You can run the code for an X-ray image by simply calling the script:
+## Usage
 
-Output
-The deblurred image will be displayed along with the original image for comparison.
-License
-This project is licensed under the MIT License. See the LICENSE file for more details.
+### Step 1: Input Image
 
-Acknowledgements
-The U-Net architecture was inspired by the original paper U-Net: Convolutional Networks for Biomedical Image Segmentation.
-The Deep Image Prior (DIP) approach is based on the paper Deep Image Prior.
+You can use any image for this task, but for demonstration, the provided code loads an image from a local directory. Replace the file path in the following line with the path to your own image:
+```matlab
+inputImage = imread('C:\Users\razar\Documents\MATLAB\random.jpg');
+```
+
+### Step 2: Running the Code
+
+Once you have set up the image path, run the `unet_denoising.m` script. The code will:
+
+1. Load and preprocess the image.
+2. Add Gaussian noise to the image to simulate the forward operator.
+3. Define the U-Net architecture.
+4. Train the network using the noisy image as input and the original image as the ground truth.
+5. Display the noisy image and the denoised result side by side.
+
+
+### Step 3: Training Options
+
+You can adjust the training options in the script. For example, modify the number of epochs, the learning rate, and the batch size as needed:
+```matlab
+options = trainingOptions('adam', ...
+    'InitialLearnRate', 1e-4, ...
+    'MaxEpochs', 1000, ...
+    'MiniBatchSize', 16, ...
+    'Shuffle', 'every-epoch', ...
+    'Plots', 'training-progress', ...
+    'Verbose', false);
+```
+
+### Step 4: Output
+
+Once the model is trained, the script will display the noisy input image alongside the denoised image in a montage:
+```matlab
+imshowpair(noisyImage, denoisedImage, 'montage');
+title('Noisy Image (Left) vs Denoised Image (Right)');
+```
+
+## Customizing the Code
+
+- **Noise Type**: You can change the type of noise applied by modifying the `imnoise` function. For example, to use salt & pepper noise:
+    ```matlab
+    noisyImage = imnoise(inputImage, 'salt & pepper', 0.02);
+    ```
+
+- **Image Size**: The input and output image size is currently set to 256x256 pixels. To use a different image size, adjust the following line in the U-Net architecture:
+    ```matlab
+    inputSize = [your_height your_width 3]; % Replace with desired dimensions
+    ```
+
+## Sample Results
+
+Below is an example result of running the code on a noisy image:
+
+| Noisy Image | Denoised Image |
+|-------------|----------------|
+| ![Noisy Image](path_to_noisy_image) | ![Denoised Image](path_to_denoised_image) |
+
+## Future Work
+
+- Extend the code to handle other types of noise (e.g., Poisson, salt & pepper).
+- Test with larger datasets for denoising tasks.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Based on the ideas from the Deep Image Prior paper by Dmitry Ulyanov et al.
+- MATLAB U-Net architecture inspired by various tutorials on image segmentation and denoising.
