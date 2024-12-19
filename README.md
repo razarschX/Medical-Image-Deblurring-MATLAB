@@ -30,7 +30,7 @@ matlab.addons.install('Deep Learning Toolbox');
 
 1. Clone or download this repository to your local machine.
     ```bash
-    git clone https://github.com/yourusername/unet-image-denoising.git
+    git clone https://github.com/yourusername/unet-image-denoising
     ```
 2. Open MATLAB and navigate to the project directory.
 
