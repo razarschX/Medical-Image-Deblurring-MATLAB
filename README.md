@@ -91,10 +91,9 @@ title('Noisy Image (Left) vs Denoised Image (Right)');
 
 Below is an example result of running the code on a noisy image:
 
-| Noisy Image | Denoised Image | Input Image |
-|-------------|----------------|-------------|
-| ![Noisy Image](noisyImage.png) | ![Denoised Image](denoisedImage.png) |  ![Input Image](original.png) |
-
+| Noisy Image | Denoised Image |
+|-------------|----------------|
+| ![Noisy Image](noisyImage.png) | ![Denoised Image](denoisedImage.png) |
 ## Future Work
 
 - Extend the code to handle other types of noise (e.g., Poisson, salt & pepper).
